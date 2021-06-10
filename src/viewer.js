@@ -281,14 +281,11 @@ export class Viewer {
 
     const box = new Box3().setFromObject(object);
     const size = box.getSize(new Vector3()).length();
-    const center = box.getCenter(new Vector3());
+    const center = new Vector3(0, 0, 0);
     console.log(box, size, center);
 
     this.controls.reset();
 
-    object.position.x += (object.position.x - center.x);
-    object.position.y += (object.position.y - center.y);
-    object.position.z += (object.position.z - center.z);
     this.controls.maxDistance = size * 10;
     this.defaultCamera.near = size / 100;
     this.defaultCamera.far = size * 100;
@@ -517,7 +514,7 @@ export class Viewer {
       }
     });
 
-    if (this.state.grid !== Boolean(this.gridHelper)) {
+    if (this.state.grid !== Boolean(this.wallSquare)) {
       if (this.state.grid) {
         const geometry = new PlaneBufferGeometry(1, 1, 1, 1);
         const material = new MeshBasicMaterial({
@@ -525,6 +522,8 @@ export class Viewer {
           wireframe: true,
         })
         this.wallSquare = new Mesh(geometry, material); 
+        this.wallSquare.renderOrder = 999;
+        this.wallSquare.onBeforeRender = (renderer) => renderer.clearDepth();
         window.wallSquare = this.wallSquare;
         this.scene.add(this.wallSquare);
 
@@ -534,11 +533,11 @@ export class Viewer {
         this.scene.add(this.axesHelper);
       } else {
         this.scene.remove(this.axesHelper);
-        this.scne.remove(this.wallSquare);
-        this.gridHelper = null;
-        this.axesHelper = null;
+        this.scene.remove(this.wallSquare);
         this.axesRenderer.clear();
         this.wallSquare.clear();
+        this.wallSquare = null;
+        this.axesHelper = null;
       }
     }
   }
