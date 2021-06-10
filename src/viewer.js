@@ -128,6 +128,8 @@ export class Viewer {
     this.controls.autoRotate = false;
     this.controls.autoRotateSpeed = -10;
     this.controls.screenSpacePanning = true;
+    this.controls.maxAzimuthAngle = Math.PI / 2;
+    this.controls.minAzimuthAngle = -Math.PI / 2
 
     this.vignette = createBackground({
       aspect: this.defaultCamera.aspect,
