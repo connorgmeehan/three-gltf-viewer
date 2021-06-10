@@ -20,6 +20,12 @@ import {
   Vector3,
   WebGLRenderer,
   sRGBEncoding,
+  PlaneHelper,
+  Plane,
+  PlaneGeometry,
+  MeshBasicMaterial,
+  Mesh,
+  PlaneBufferGeometry,
 } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -78,7 +84,7 @@ export class Viewer {
       camera: DEFAULT_CAMERA,
       wireframe: false,
       skeleton: false,
-      grid: false,
+      grid: true,
 
       // Lights
       addLights: true,
@@ -88,7 +94,7 @@ export class Viewer {
       ambientColor: 0xFFFFFF,
       directIntensity: 0.8 * Math.PI, // TODO(#116)
       directColor: 0xFFFFFF,
-      bgColor1: '#ffffff',
+      bgColor1: '#e0dddd',
       bgColor2: '#353535'
     };
 
@@ -100,6 +106,7 @@ export class Viewer {
 
     this.scene = new Scene();
 
+    // Add 1x1 wall square
     const fov = options.preset === Preset.ASSET_GENERATOR
       ? 0.8 * 180 / Math.PI
       : 60;
@@ -273,6 +280,7 @@ export class Viewer {
     const box = new Box3().setFromObject(object);
     const size = box.getSize(new Vector3()).length();
     const center = box.getCenter(new Vector3());
+    console.log(box, size, center);
 
     this.controls.reset();
 
@@ -509,18 +517,26 @@ export class Viewer {
 
     if (this.state.grid !== Boolean(this.gridHelper)) {
       if (this.state.grid) {
-        this.gridHelper = new GridHelper();
+        const geometry = new PlaneBufferGeometry(1, 1, 1, 1);
+        const material = new MeshBasicMaterial({
+          color: 0xffffff,
+          wireframe: true,
+        })
+        this.wallSquare = new Mesh(geometry, material); 
+        window.wallSquare = this.wallSquare;
+        this.scene.add(this.wallSquare);
+
         this.axesHelper = new AxesHelper();
         this.axesHelper.renderOrder = 999;
         this.axesHelper.onBeforeRender = (renderer) => renderer.clearDepth();
-        this.scene.add(this.gridHelper);
         this.scene.add(this.axesHelper);
       } else {
-        this.scene.remove(this.gridHelper);
         this.scene.remove(this.axesHelper);
+        this.scne.remove(this.wallSquare);
         this.gridHelper = null;
         this.axesHelper = null;
         this.axesRenderer.clear();
+        this.wallSquare.clear();
       }
     }
   }
